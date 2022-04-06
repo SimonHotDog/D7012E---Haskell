@@ -54,3 +54,5 @@ smallerRoot a b c = root a b c smallRoot
 
 largerRoot :: Float -> Float -> Float -> Float
 largerRoot a b c = root a b c largeRoot
+
+-- 4.7
