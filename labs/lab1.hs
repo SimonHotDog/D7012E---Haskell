@@ -17,13 +17,13 @@ insertionSort = foldr ins []
 
 -- Sublist generation
 
-sublistHead :: [Int] -> Int -> [(Int, Int, Int, [Int])]
-sublistHead [] _ = []
-sublistHead x i = (sum x, i, i + length x - 1, x) : sublistHead (init x) i
+sublistsInner :: [Int] -> Int -> [(Int, Int, Int, [Int])]
+sublistsInner [] _ = []
+sublistsInner x i = (sum x, i, i + length x - 1, x) : sublistsInner (init x) i
 
 sublists :: [Int] -> Int -> [(Int, Int, Int, [Int])]
 sublists [] _ = []
-sublists x i = sublistHead x i ++ sublists (tail x) (i+1)
+sublists x i = sublistsInner x i ++ sublists (tail x) (i+1)
 
 
 -- Final function
