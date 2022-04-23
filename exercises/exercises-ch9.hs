@@ -23,5 +23,5 @@ minf :: (Int -> Int) -> Int -> Int
 minf f 0 = f 0
 minf f n = min (f n) (minf f (n-1))
 
---valeqf :: (Int -> Int) -> Int -> Bool 
+--valeqf :: (Int -> Int) -> Int -> Bool
 
