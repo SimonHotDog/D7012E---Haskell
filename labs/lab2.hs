@@ -1,5 +1,7 @@
 -- Simon Lundberg
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 
 import Data.Char
 
@@ -13,20 +15,20 @@ parse = fst . buildexpr
   where
     notfirst p (_,[]) = True
     notfirst p (_,x:xs) = not (p x)
-    
+
     buildnumber :: String -> (EXPR,String)
     buildnumber xs = until (notfirst isDigit) accdigits (Const 0, xs)
       where
         accdigits :: (EXPR,String) -> (EXPR,String)
         accdigits (Const n, y:ys) = (Const(10*n+(ord y - 48)), ys)
-    
+
     buildvar :: String -> (EXPR,String)
     buildvar xs = until (notfirst isLetter) accletters (Var "", xs)
       where
         accletters :: (EXPR,String) -> (EXPR,String)
         accletters (Var s, y:ys) = (Var (s ++[y]), ys)
-    
-    
+
+
     buildexpr :: String -> (EXPR,String)
     buildexpr xs = until (notfirst (\c -> c=='-' || c=='+')) accterms (buildterm xs)
       where
@@ -34,15 +36,15 @@ parse = fst . buildexpr
         accterms (term, y:ys) = (Op (y:[]) term term1, zs)
           where
             (term1,zs) = buildterm ys
-    
+
     buildterm :: String -> (EXPR,String)
     buildterm xs = until (notfirst (\c -> c=='*' || c=='/')) accfactors (buildfactor xs)
       where
-        accfactors :: (EXPR,String) -> (EXPR,String)  
+        accfactors :: (EXPR,String) -> (EXPR,String)
         accfactors (fact, y:ys) = (Op (y:[]) fact fact1, zs)
           where
             (fact1,zs) = buildfactor ys
-    
+
     buildfactor :: String -> (EXPR,String)
     buildfactor [] = error "missing factor"
     buildfactor ('(':xs) =  case buildexpr xs of (e, ')':ws) -> (e, ws); _ -> error "missing factor"
@@ -108,6 +110,36 @@ simplify (Op oper left right) =
       (op,le,re)      -> Op op le re
 simplify (App func e) = App func (simplify e)
 
+--Creating functions
+
 mkfun :: (EXPR, EXPR) -> (Float -> Float)
 mkfun (body, var) x = eval body [(unparse var, x)]
 
+-- Newton-Raphson
+
+findzero :: String -> String -> Float -> Float
+findzero s1 s2 x= findzeroInner f f' x
+  where
+    f = mkfun (parse s2, Var s1)
+    f' = mkfun (diff (Var s1) (parse s2), Var s1)
+
+
+findzeroInner :: (Float -> Float) -> (Float -> Float) -> Float -> Float
+findzeroInner e d v
+  | abs (x - v) < 0.0001 = x
+  | otherwise = findzeroInner e d x
+  where x = v - e v / d v
+
+-- for testing
+
+-- Should be "((2*cos((2*x)))*exp(sin((2*x))))"
+parseTest = unparse (simplify (diff (Var "x") (parse "exp(sin(2*x))")))
+
+-- Should be 11.0
+mkfunTest = mkfun (parse "x*x+2", Var "x") 3
+
+-- Should be 0.68232775
+zerotest1 = findzero "x" "x*x*x+x-1" 1.0
+
+-- Should be 1.5707964
+zerotest2 = findzero "y" "cos(y)*sin(y)" 2.0
