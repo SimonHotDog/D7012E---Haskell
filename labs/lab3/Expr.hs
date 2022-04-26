@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Expr(Expr, T, parse, fromString, value, toString) where
 
 {-
@@ -27,7 +28,7 @@ import Prelude hiding (return, fail)
 import Parser hiding (T)
 import qualified Dictionary
 
-data Expr = Num Integer | Var String | Add Expr Expr 
+data Expr = Num Integer | Var String | Add Expr Expr
        | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
          deriving Show
 
@@ -53,10 +54,10 @@ factor = num !
          var !
          lit '(' -# expr #- lit ')' !
          err "illegal factor"
-             
+
 term' e = mulOp # factor >-> bldOp e #> term' ! return e
 term = factor #> term'
-       
+
 expr' e = addOp # term >-> bldOp e #> expr' ! return e
 expr = term #> expr'
 
@@ -71,8 +72,14 @@ shw prec (Mul t u) = parens (prec>6) (shw 6 t ++ "*" ++ shw 6 u)
 shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 7 u)
 
 value :: Expr -> Dictionary.T String Integer -> Integer
-value (Num n) _ = error "value not implemented"
-
+value (Num n) _ = n
+value (Var e) dict = case Dictionary.lookup e dict of
+        Just n -> n
+        Nothing -> error ("Error: unknown var " ++ show e)
+value (Add e1 e2) dict = value e1 dict + value e2 dict
+value (Sub e1 e2) dict = value e1 dict - value e2 dict
+value (Mul e1 e2) dict = value e1 dict * value e2 dict
+value (Div e1 e2) dict = value e1 dict `div` value e2 dict
 instance Parse Expr where
     parse = expr
     toString = shw 0
