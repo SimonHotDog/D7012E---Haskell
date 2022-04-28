@@ -63,7 +63,7 @@ exec (While ex st : stmts) dict input = -- While
     then exec (st : (While ex st : stmts)) dict input
     else exec stmts dict input
 exec (Begin s : stmts) dict input = exec (s ++ stmts) dict input -- Begin
-exec (Read r: stmts) dict input) = exec stmts (Dictionary.insert (r, i) dict) input -- Read
+exec (Read r: stmts) dict (i:input) = exec stmts (Dictionary.insert (r, i) dict) input -- Read
 exec (Skip : stmts) dict input = exec stmts dict input -- Skip
 exec (Repeat st ex : stmts) dict input = exec (st : If ex Skip (Repeat st ex) : stmts) dict input -- Repeat
 exec _ _ _ = []
