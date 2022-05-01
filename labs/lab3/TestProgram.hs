@@ -4,7 +4,7 @@
 module TestProgram where
 
 import Program
-p, p1 :: Program.T
+p, p1, p2 :: Program.T
 p = fromString  ("\
 \read k;\
 \read n;\
@@ -35,8 +35,23 @@ p1 = fromString  ("\
 \  end\
 \write s;")
 
+-- Repeat program
+p2 = fromString  ("\
+\read n;\
+\s := 0;\
+\repeat\
+\  begin\
+\    s := s + n;\
+\    n := n - 1;\
+\  end\
+\until (0-n)+1;\
+\write s;")
+
 sp = putStr (toString p)
 
 rp = Program.exec p [3,16]
 
 rp1 = Program.exec p1 [1024, 2]
+
+-- Repeat test
+rp2 = Program.exec p2 [3]
