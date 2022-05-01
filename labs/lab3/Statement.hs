@@ -4,6 +4,7 @@ import Prelude hiding (return, fail)
 import Parser hiding (T)
 import qualified Dictionary
 import qualified Expr
+import Distribution.Compat.CharParsing (CharParsing(string))
 type T = Statement
 data Statement =
     Assignment String Expr.T |
@@ -69,6 +70,24 @@ exec (Repeat st ex : stmts) dict input = exec (st : If ex Skip (Repeat st ex) : 
 exec _ _ _ = []
 
 
+indentation :: Int -> String
+indentation 0 = ""
+indentation i = "    " ++ indentation (i - 1)
+
+stringify :: Int -> T -> String 
+
+stringify i (Assignment v e) = indentation i ++ v ++ " := " ++ toString e ++ ";"
+stringify i (If condition thenStmt elseStmt) = indentation i ++ "if " ++ toString condition ++ " then\n" ++ stringify (i + 1) thenStmt ++ "\n" ++ indentation i ++ "else\n" ++ stringify (i + 1) elseStmt
+stringify i (Write v) = indentation i ++ "write " ++ toString v ++ ";"
+stringify i (While condition stmt) = indentation i ++ "while " ++ toString condition ++ " do\n" ++ stringify (i + 1) stmt
+stringify i (Begin s) = indentation i ++ "begin " ++ statementPrinter s ++ "\n" ++ indentation i ++ "end\n"
+    where
+        statementPrinter (s : stmts) = "\n" ++ stringify (i + 1) s ++ statementPrinter stmts
+        statementPrinter [] = ""
+stringify i (Read r) = indentation i ++ "read " ++ r ++ ";"
+stringify i Skip = indentation i ++ "skip;"
+stringify i (Repeat st ex) = indentation i ++ "repeat\n" ++ stringify (i + 1) st ++ "\nuntil " ++ toString ex ++ "\n"
+
 instance Parse Statement where
   parse = statement
-  toString = error "Statement.toString not implemented"
+  toString = stringify 0
