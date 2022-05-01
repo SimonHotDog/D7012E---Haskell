@@ -1,3 +1,5 @@
+-- Simon Lundberg
+
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Program(T, parse, fromString, toString, exec) where
 import Parser hiding (T)

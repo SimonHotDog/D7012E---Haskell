@@ -1,3 +1,5 @@
+-- Simon Lundberg
+
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Expr(Expr, T, parse, fromString, value, toString) where
 

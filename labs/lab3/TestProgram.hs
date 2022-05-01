@@ -1,3 +1,5 @@
+-- Simon Lundberg
+
 {- Test for Program -}
 module TestProgram where
 

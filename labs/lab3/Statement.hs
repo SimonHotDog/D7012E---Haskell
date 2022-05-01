@@ -1,3 +1,5 @@
+-- Simon Lundberg
+
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Statement(T, parse, toString, fromString, exec) where
 import Prelude hiding (return, fail)
