@@ -18,29 +18,29 @@ iter m = m # iter m >-> cons ! return []
 
 cons(a, b) = a:b
 
-(-#) :: Parser a -> Parser b -> Parser b
+(-#) :: Parser a -> Parser b -> Parser b -- Applies two parsers in sequence, discards second result
 m -# n = m # n >-> snd
 
-(#-) :: Parser a -> Parser b -> Parser a
+(#-) :: Parser a -> Parser b -> Parser a -- Applies two parsers in sequence, discards second result
 m #- n = m # n >-> fst
 
-spaces :: Parser String
+spaces :: Parser String -- Finds all spaces in a string
 spaces = iter (char ? isSpace)
 
-token :: Parser a -> Parser a
+token :: Parser a -> Parser a -- Removes all spaces in a string
 token m = m #- spaces
 
-letter :: Parser Char
+letter :: Parser Char -- single letter
 letter = char ? isAlpha
 
-word :: Parser String
+word :: Parser String -- single word
 word = token (letter # iter letter >-> cons)
 
-chars :: Int -> Parser String
+chars :: Int -> Parser String -- n chars
 chars 0 = return []
 chars n = char # chars(n-1) >-> cons
 
-accept :: String -> Parser String
+accept :: String -> Parser String -- Was already implemented
 accept w = token (chars (length w)) ? (==w)
 
 require :: String -> Parser String

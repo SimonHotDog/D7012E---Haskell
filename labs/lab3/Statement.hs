@@ -24,7 +24,7 @@ statement :: Parser Statement
 statement = assignment ! conditional ! write ! while ! begin ! Statement.read ! skip ! Statement.repeat
 statements = iter statement
 
--- Assignment parsing
+-- Assignment parsing (Given)
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
     where buildAss (v, e) = Assignment v e
 
